@@ -1,0 +1,139 @@
+{
+	"info": {
+		"_postman_id": "ae74039a-3dc1-443f-958f-7878a76e726e",
+		"name": "SCRIPTS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37026990"
+	},
+	"item": [
+		{
+			"name": "Create-Script ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Comprobar si el estado de la respuesta es 200\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Analizar la respuesta JSON\r",
+							"let responseData;\r",
+							"\r",
+							"try {\r",
+							"    responseData = pm.response.json();\r",
+							"} catch (e) {\r",
+							"    responseData = {};\r",
+							"    console.error('Error parsing JSON response:', e);\r",
+							"}\r",
+							"\r",
+							"// Verifica si data está en la respuesta y usa responseData.data si es necesario\r",
+							"if (responseData.hasOwnProperty('data')) {\r",
+							"    responseData = responseData.data;\r",
+							"}\r",
+							"\r",
+							"// Campos para comprobar si hay valores nulos\r",
+							"const fieldsToCheck = [\"name\", \"franchiseId\", \"status\", \"userId\"]; // Changed \"name\" to \"id\"\r",
+							"\r",
+							"// Función para comprobar si los campos no son nulos\r",
+							"fieldsToCheck.forEach(field => {\r",
+							"    pm.test(`${field} should not be null`, function () {\r",
+							"        pm.expect(responseData[field]).to.not.be.null;\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// Función para validar UUID\r",
+							"function isValidUUID(id) {\r",
+							"    return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);\r",
+							"}\r",
+							"\r",
+							"// Validar que cada 'id' en 'integrations' sea un UUID válido\r",
+							"pm.test(\"Each integration ID should be a valid UUID\", function () {\r",
+							"    if (responseData.integrations) { // Added a check for the existence of integrations\r",
+							"        responseData.integrations.forEach(integration => {\r",
+							"            pm.expect(integration.id).to.not.be.null;\r",
+							"            pm.expect(isValidUUID(integration.id)).to.be.true;\r",
+							"        });\r",
+							"        console.log(\"Integration IDs:\", responseData.integrations.map(integration => integration.id));\r",
+							"    } else {\r",
+							"        console.log(\"No integrations found\");\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Sincronizacion de Menu v3\", //string max:100,required\r\n    \"franchiseId\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\", //string max:255\r\n    \"status\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\", //string max:25 obligatorio \r\n    \"observations\": \"Observación de Menu v3\", //string : max: 300, null\r\n    \"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa4\", //string max:255, reuqired\r\n    \"hourToExecute\": \"2024-05-22T20:20:01\", //string max: 50, null\r\n    \"integrations\": [ //por lo menos 1 debe llegar!!\r\n        {\r\n            \"id\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\"\r\n        }, //string max:100}\r\n        {\r\n            \"id\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\"\r\n        } //string max:100}\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_orchestrator}}/api/v1/synchronizations/create",
+					"host": [
+						"{{server_orchestrator}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"synchronizations",
+						"create"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "CreateOk",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Sincornizacion de Menu v3\", //string max:100\r\n    \"status\": \"3fa85f64-5717-4562-b3fc-2c963f66afa4\", //string max:100\r\n    \"observations\": \"\", //string : max: 300\r\n    \"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa4\", ///string max:100\r\n    \"hourToExecute\": \"2024-05-22T04:37:24.617Z\", //string max: 50\r\n    \"integrations\": [\r\n        {\r\n            \"id\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\",\r\n            \"order\": 1\r\n        }, //string max:100}\r\n        {\r\n            \"id\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\",\r\n            \"order\": 2\r\n        } //string max:100}\r\n    ],\r\n    \"franchiseId\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\" //string max:100\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server_orchestrator}}/api/v1/synchronizations/create",
+							"host": [
+								"{{server_orchestrator}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"synchronizations",
+								"create"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"description": ""
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"code\": 10,\n    \"messages\": [\n        \"created succefully\"\n    ],\n    \"data\": {\n        \"id\": \"69503d8f-fa70-2196-f0a0-e3a85fa10aec\",\n        \"name\": \"Sincornizacion de Menu v3\", \n        \"status\": \"3fa85f64-5717-4562-b3fc-2c963f66afa4\", \n        \"observations\": \"\", \n        \"userId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa4\", \n        \"hourToExecute\": \"2024-05-22T04:37:24.617Z\", \n        \"integrations\": [\n            {\n                \"id\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\",\n                \"order\": 1\n            }, \n            {\n                \"id\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\",\n                \"order\": 2\n            } \n        ],\n        \"franchiseId\": \"b5ad9754-0419-46e5-b556-7ab1ab8db3e1\" \n    }\n}"
+				}
+			]
+		}
+	]
+}
